@@ -14,27 +14,44 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+# Inicializar variables de estado para guardar el código escaneado
+if "codigo_procesado" not in st.session_state:
+    st.session_state.codigo_procesado = ""
+
+def limpiar_y_procesar():
+    """Captura el código del input, lo guarda en el estado y vacía la casilla inmediatamente."""
+    st.session_state.codigo_procesado = st.session_state.input_codigo
+    st.session_state.input_codigo = ""  # Borra el texto de la casilla gris
+
 ruta_logo = "logo_empresa.png"
 if os.path.exists(ruta_logo):
     img_logo = Image.open(ruta_logo)
     col1, col2, col3 = st.columns(3)
     with col2:
-        # CORRECCIÓN DE LA ADVERTENCIA VISUAL:
         st.image(img_logo, use_container_width=True)
 
 st.title("SISTEMA CONTROL DE INVENTARIOS")
 st.markdown("<p style='text-align: center; font-style: italic; color: #aaaaaa;'>Modo: Listo para Escaneo Continuo</p>", unsafe_allow_html=True)
 st.markdown("<hr style='border-top: 1px dashed #444;'>", unsafe_allow_html=True)
 
-codigo_escaneado = st.text_input("[ESCANEAR CAJA AQUÍ] -> ", key="input_codigo", placeholder="Dispara la pistola o digita el ID...").strip()
+# Campo de texto enlazado a la función de limpieza al presionar Enter o disparar la pistola
+st.text_input(
+    "[ESCANEAR CAJA AQUÍ] -> ", 
+    key="input_codigo", 
+    placeholder="Dispara la pistola o digita el ID...",
+    on_change=limpiar_y_procesar
+)
 
-if codigo_escaneado:
+# Evaluar el código que se guardó en el estado de la sesión
+codigo_actual = st.session_state.codigo_procesado
+
+if codigo_actual:
     try:
         df = pd.read_csv("inventario_licores.csv", sep="|")
         df.columns = df.columns.str.strip()
         df["id_caja"] = df["id_caja"].astype(str).str.strip()
         
-        resultado = df[df["id_caja"] == codigo_escaneado]
+        resultado = df[df["id_caja"] == codigo_actual]
         
         if not resultado.empty:
             fila = resultado.iloc[0]
@@ -57,7 +74,7 @@ if codigo_escaneado:
                 <div style="border: 3px solid #e74c3c; padding: 25px; border-radius: 10px; background-color: #fdf2f2; font-family: Arial, sans-serif; margin-top: 20px;">
                     <h2 style="color: #c0392b; margin-top: 0; text-align: left; font-family: Arial;">❌ CAJA NO ENCONTRADA</h2>
                     <hr style="border-top: 1px solid #ccc; margin: 10px 0;">
-                    <p style="font-size: 16px; text-align: center; color: #2c3e50; font-family: Arial;">El código <strong>\"{codigo_escaneado}\"</strong> no existe en el sistema.</p>
+                    <p style="font-size: 16px; text-align: center; color: #2c3e50; font-family: Arial;">El código <strong>\"{codigo_actual}\"</strong> no existe en el sistema.</p>
                 </div>
             """, unsafe_allow_html=True)
     except FileNotFoundError:
