@@ -56,8 +56,8 @@ if codigo_actual:
                     <h2 style="color: #27ae60; margin-top: 0; text-align: left; font-family: Arial;">✅ CAJA VERIFICADA</h2>
                     <hr style="border-top: 1px solid #ccc; margin: 10px 0;">
                     <p style="font-size: 16px; color: #2c3e50; margin: 8px 0; font-family: Arial;"><strong>📦 ID de Caja:</strong> <span style="font-size: 18px; color: #2c3e50;">{fila['id_caja']}</span></p>
-                    <p style="font-size: 18px; color: #d35400; margin: 8px 0; font-family: Arial;"><strong>🍾 Licor Contenido:</strong> {fila['referencia_licor']}</p>
-                    <p style="font-size: 20px; color: #2980b9; margin: 8px 0; font-family: Arial;"><strong>🔢 Cantidad en Caja:</strong> {fila['cantidad_botellas']} Botellas</p>
+                    <p style="font-size: 18px; color: #d35400; margin: 8px 0; font-family: Arial;"><strong>🍾 Contenido:</strong> {fila['referencia_licor']}</p>
+                    <p style="font-size: 20px; color: #2980b9; margin: 8px 0; font-family: Arial;"><strong>🔢 Cantidad en Caja:</strong> {fila['cantidad_botellas']} Unidades</p>
                     <p style="font-size: 14px; color: #7f8c8d; margin: 8px 0; font-family: Arial;"><strong>📝 Notas:</strong> {fila['detalles_producto']}</p>
                     <hr style="border-top: 1px dashed #ccc; margin: 15px 0;">
                     <div style="font-size: 15px; color: #2c3e50; background-color: #e8f8f5; padding: 10px; border-radius: 5px; border-left: 5px solid #1abc9c; font-family: Arial;">
