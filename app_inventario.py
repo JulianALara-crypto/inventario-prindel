@@ -28,7 +28,7 @@ if os.path.exists(ruta_logo):
     with col2:
         st.image(img_logo, use_container_width=True)
 
-st.title("SISTEMA CONTROL DE INVENTARIOS")
+st.title("SISTEMA CONTROL DE INVENTARIOS PRINDEL")
 st.markdown("<p style='text-align: center; font-style: italic; color: #aaaaaa;'>Modo: Listo para Escaneo Continuo</p>", unsafe_allow_html=True)
 st.markdown("<hr style='border-top: 1px dashed #444;'>", unsafe_allow_html=True)
 
