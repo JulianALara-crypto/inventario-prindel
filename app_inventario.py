@@ -55,7 +55,7 @@ if codigo_actual:
             fila = resultado.iloc[0]
             ref_licor = fila["referencia_licor"]
             
-            # === CÁLCULOS DEL INVENTARIO CONSOLIDADO ===
+            # === CÁLCULOS DEL INVENTARIO CONSOLIDADO EN VIVO ===
             mismo_producto = df[df["referencia_licor"] == ref_licor]
             total_cajas_ref = len(mismo_producto)
             total_unidades_ref = mismo_producto["cantidad_botellas"].sum()
@@ -69,11 +69,20 @@ if codigo_actual:
                     <p style="font-size: 20px; color: #2980b9; margin: 8px 0; font-family: Arial;"><strong>🔢 Cantidad en ESTA Caja:</strong> {fila['cantidad_botellas']} Unidades</p>
                     <p style="font-size: 14px; color: #7f8c8d; margin: 8px 0; font-family: Arial;"><strong>📝 Notas:</strong> {fila['detalles_producto']}</p>
                     <hr style="border-top: 2px solid #34495e; margin: 15px 0;">
+                    
+                    <!-- === SECCIÓN DE TOTALES CONSOLIDADOS === -->
                     <h3 style="color: #2c3e50; margin-top: 0; font-size: 16px; font-family: Arial;">📊 CONSOLIDADO EN BODEGA (Misma Referencia)</h3>
                     <div style="display: flex; gap: 10px; margin-bottom: 15px; font-family: Arial;">
-                        <div style="flex: 1; background-color: #eaf2f8; padding: 10px; border-radius: 5px; border-left: 5px solid #2980b9;"><strong>📦 Cajas Totales:</strong><br><span style="font-size: 20px; color: #1f618d;">{total_cajas_ref} Cajas</span></div>
-                        <div style="flex: 1; background-color: #fef9e7; padding: 10px; border-radius: 5px; border-left: 5px solid #f39c12;"><strong>🍾 Unidades Totales:</strong><br><span style="font-size: 20px; color: #b7950b;">{total_unidades_ref} Botellas</span></div>
+                        <div style="flex: 1; background-color: #eaf2f8; padding: 10px; border-radius: 5px; border-left: 5px solid #2980b9;">
+                            <strong style="color: #2c3e50;">📦 Cajas Totales:</strong><br>
+                            <span style="font-size: 20px; color: #1f618d; font-weight: bold;">{total_cajas_ref} Cajas</span>
+                        </div>
+                        <div style="flex: 1; background-color: #fef9e7; padding: 10px; border-radius: 5px; border-left: 5px solid #f39c12;">
+                            <strong style="color: #2c3e50;">🍾 Unidades Totales:</strong><br>
+                            <span style="font-size: 20px; color: #b7950b; font-weight: bold;">{total_unidades_ref} Botellas</span>
+                        </div>
                     </div>
+                    
                     <div style="font-size: 15px; color: #2c3e50; background-color: #e8f8f5; padding: 10px; border-radius: 5px; border-left: 5px solid #1abc9c; font-family: Arial;">
                         <strong>👤 Responsable Inventario:</strong> {fila['operario_conteo']}
                     </div>
