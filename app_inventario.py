@@ -35,7 +35,7 @@ st.markdown("<hr style='border-top: 1px dashed #444;'>", unsafe_allow_html=True)
 st.text_input(
     "[ESCANEAR CAJA AQUÍ] -> ", 
     key="input_codigo", 
-    placeholder="Dispara la pistola o digita el ID...",
+    placeholder="Leer código de barras o digita el ID...",
     on_change=limpiar_y_procesar
 )
 
