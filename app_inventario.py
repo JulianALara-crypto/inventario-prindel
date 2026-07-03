@@ -7,7 +7,7 @@ st.set_page_config(page_title="Control de Inventarios", page_icon="📦", layout
 
 st.markdown("""
     <style>
-    .stApp { background-color: #1a1a1a; }
+    .stApp { background-color: #white; }
     h1 { color: #ffffff; text-align: center; font-family: Arial; }
     p { color: #aaaaaa; }
     div[data-testid="stDecoration"] { display: none; }
