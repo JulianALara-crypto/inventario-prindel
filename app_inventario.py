@@ -42,6 +42,8 @@ st.text_input(
 codigo_actual = st.session_state.codigo_procesado
 
 if codigo_actual:
+ # >>> AGREGA ESTA LÍNEA AQUÍ CON CUATRO ESPACIOS DE SANGRÍA <<<
+    codigo_actual = codigo_actual.replace("'", "-")
     try:
         df = pd.read_csv("inventario_licores.csv", sep="|", encoding="latin-1", keep_default_na=False)
         df.columns = df.columns.str.strip()
