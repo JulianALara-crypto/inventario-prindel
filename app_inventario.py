@@ -14,14 +14,12 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Inicializar variables de estado para guardar el código escaneado
 if "codigo_procesado" not in st.session_state:
     st.session_state.codigo_procesado = ""
 
 def limpiar_y_procesar():
-    """Captura el código del input, lo guarda en el estado y vacía la casilla inmediatamente."""
     st.session_state.codigo_procesado = st.session_state.input_codigo
-    st.session_state.input_codigo = ""  # Borra el texto de la casilla gris
+    st.session_state.input_codigo = ""
 
 ruta_logo = "logo_empresa.png"
 if os.path.exists(ruta_logo):
@@ -34,7 +32,6 @@ st.title("SISTEMA CONTROL DE INVENTARIOS")
 st.markdown("<p style='text-align: center; font-style: italic; color: #aaaaaa;'>Modo: Listo para Escaneo Continuo</p>", unsafe_allow_html=True)
 st.markdown("<hr style='border-top: 1px dashed #444;'>", unsafe_allow_html=True)
 
-# Campo de texto enlazado a la función de limpieza al presionar Enter o disparar la pistola
 st.text_input(
     "[ESCANEAR CAJA AQUÍ] -> ", 
     key="input_codigo", 
@@ -42,12 +39,11 @@ st.text_input(
     on_change=limpiar_y_procesar
 )
 
-# Evaluar el código que se guardó en el estado de la sesión
 codigo_actual = st.session_state.codigo_procesado
 
 if codigo_actual:
     try:
-        df = pd.read_csv("inventario_licores.csv", sep="|")
+        df = pd.read_csv("inventario_licores.csv", sep="|", encoding="latin-1", keep_default_na=False)
         df.columns = df.columns.str.strip()
         df["id_caja"] = df["id_caja"].astype(str).str.strip()
         
