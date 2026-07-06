@@ -3,7 +3,7 @@ import pandas as pd
 import os
 from PIL import Image
 
-ruta_logo = 'pequeño.png'.png'
+ruta_logo = 'pequeño.png'
 if os.path.exists(ruta_logo):
     icono_pestana = Image.open(ruta_logo)
 else:
