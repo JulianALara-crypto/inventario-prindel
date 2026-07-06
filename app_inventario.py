@@ -13,9 +13,10 @@ if 'input_codigo' not in st.session_state:
     st.session_state.input_codigo = ''
 
 def limpiar_y_procesar():
-    codigo_limpio = st.session_state.input_codigo.replace("'", "-")
-    st.session_state.codigo_procesado = codigo_limpio
-    st.session_state.input_codigo = ''
+    if 'input_codigo' in st.session_state:
+        codigo_limpio = st.session_state.input_codigo.replace("'", "-")
+        st.session_state.codigo_procesado = codigo_limpio
+        st.session_state.input_codigo = ''
 
 ruta_logo = 'logo_empresa.png'
 if os.path.exists(ruta_logo):
