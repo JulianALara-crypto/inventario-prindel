@@ -11,7 +11,9 @@ if 'codigo_procesado' not in st.session_state:
     st.session_state.codigo_procesado = ''
 
 def limpiar_y_procesar():
-    st.session_state.codigo_procesado = st.session_state.input_codigo
+    # Reemplaza de inmediato comillas simples (') por guiones (-) al recibir el disparo de la pistola
+    codigo_limpio = st.session_state.input_codigo.replace("'", "-")
+    st.session_state.codigo_procesado = codigo_limpio
     st.session_state.input_codigo = ''
 
 ruta_logo = 'logo_empresa.png'
@@ -24,7 +26,6 @@ st.text_input('[ESCANEAR CAJA AQUÍ] -> ', key='input_codigo', placeholder='Leer
 
 codigo_actual = st.session_state.codigo_procesado
 if codigo_actual:
-    codigo_actual = codigo_actual.replace("'", "-")
     try:
         df = pd.read_csv('inventario_licores.csv', sep='|', encoding='latin-1', keep_default_na=False)
         df.columns = df.columns.str.strip()
@@ -32,6 +33,7 @@ if codigo_actual:
         df['cajas_totales'] = pd.to_numeric(df['cajas_totales'], errors='coerce').fillna(1).astype(int)
         df['amount_por_caja'] = pd.to_numeric(df['cantidad_por_caja'], errors='coerce').fillna(12).astype(int)
         
+        # Obtener el código base (Ej: de CAJA-001-2 extrae CAJA-001)
         codigo_base = '-'.join(codigo_actual.split('-')[:2]) if '-' in codigo_actual else codigo_actual
         resultado = df[df['id_caja'] == codigo_base]
 
