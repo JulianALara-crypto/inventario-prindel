@@ -3,7 +3,13 @@ import pandas as pd
 import os
 from PIL import Image
 
-st.set_page_config(page_title='Control de Inventarios', page_icon='📦', layout='centered')
+ruta_logo = 'logo_empresa.png'
+if os.path.exists(ruta_logo):
+    icono_pestana = Image.open(ruta_logo)
+else:
+    icono_pestana = '📦'
+
+st.set_page_config(page_title='Control de Inventarios', page_icon=icono_pestana, layout='centered')
 
 st.markdown('<style>.stApp { background-color: #1a1a1a; } h1 { color: #ffffff; text-align: center; } p { color: #aaaaaa; } div[data-testid="stDecoration"] { display: none; }</style>', unsafe_allow_html=True)
 
@@ -18,7 +24,6 @@ def limpiar_y_procesar():
         st.session_state.codigo_procesado = codigo_limpio
         st.session_state.input_codigo = ''
 
-ruta_logo = 'logo_empresa.png'
 if os.path.exists(ruta_logo):
     col1, col2, col3 = st.columns(3)
     with col2: st.image(Image.open(ruta_logo), use_container_width=True)
