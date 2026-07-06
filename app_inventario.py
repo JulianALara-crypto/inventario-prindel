@@ -11,7 +11,6 @@ if 'codigo_procesado' not in st.session_state:
     st.session_state.codigo_procesado = ''
 
 def limpiar_y_procesar():
-    # Corrige instantáneamente las comillas simples por guiones del lector
     codigo_limpio = st.session_state.input_codigo.replace("'", "-")
     st.session_state.codigo_procesado = codigo_limpio
     st.session_state.input_codigo = ''
@@ -32,34 +31,15 @@ if codigo_actual:
         df['id_caja'] = df['id_caja'].astype(str).str.strip()
         df['cajas_totales'] = pd.to_numeric(df['cajas_totales'], errors='coerce').fillna(1).astype(int)
         df['cantidad_por_caja'] = pd.to_numeric(df['cantidad_por_caja'], errors='coerce').fillna(12).astype(int)
-        
         codigo_base = '-'.join(codigo_actual.split('-')[:2]) if '-' in codigo_actual else codigo_actual
         resultado = df[df['id_caja'] == codigo_base]
-
         if not resultado.empty:
             fila = resultado.iloc[0]
             total_cajas = fila['cajas_totales']
             unidades_por_caja = fila['cantidad_por_caja']
             total_unidades_lote = total_cajas * unidades_por_caja
-
-            st.markdown(f'''
-            <div style="border: 3px solid #2ecc71; padding: 25px; border-radius: 10px; background-color: #222222; font-family: Arial, sans-serif; margin-top: 20px;">
-            <h2 style="color: #2ecc71; margin-top: 0;">✅ CAJA VERIFICADA: {codigo_actual}</h2>
-            <hr style="border-top: 1px solid #444; margin: 10px 0;">
-            <p style="color: #ffffff; font-size: 16px;"><b>Referencia:</b> {fila['referencia_licor']}</p>
-            <p style="color: #ffffff; font-size: 16px;"><b>Cantidad en esta caja:</b> {unidades_por_caja} Unidades</p>
-            <p style="color: #ffffff; font-size: 16px;"><b>Lote Completo:</b> {total_cajas} Cajas ({total_unidades_lote} Unidades Totales)</p>
-            <p style="color: #ffffff; font-size: 16px;"><b>Responsable:</b> {fila['operario_conteo']}</p>
-            <p style="color: #aaaaaa; font-size: 14px; font-style: italic;"><b>Novedades:</b> {fila['detalles_producto']}</p>
-            </div>
-            ''', unsafe_allow_html=True)
+            st.markdown(f'<div style="border: 3px solid #2ecc71; padding: 25px; border-radius: 10px; background-color: #222222; font-family: Arial, sans-serif; margin-top: 20px;"><h2 style="color: #2ecc71; margin-top: 0;">✅ CAJA VERIFICADA: {codigo_actual}</h2><hr style="border-top: 1px solid #444; margin: 10px 0;"><p style="color: #ffffff; font-size: 16px;"><b>Referencia:</b> {fila["referencia_licor"]}</p><p style="color: #ffffff; font-size: 16px;"><b>Cantidad en esta caja:</b> {unidades_por_caja} Unidades</p><p style="color: #ffffff; font-size: 16px;"><b>Lote Completo:</b> {total_cajas} Cajas ({total_unidades_lote} Unidades Totales)</p><p style="color: #ffffff; font-size: 16px;"><b>Responsable:</b> {fila["operario_conteo"]}</p><p style="color: #aaaaaa; font-size: 14px; font-style: italic;"><b>Novedades:</b> {fila["detalles_producto"]}</p></div>', unsafe_allow_html=True)
         else:
-            st.markdown('''
-            <div style="border: 3px solid #e74c3c; padding: 25px; border-radius: 10px; background-color: #222222; font-family: Arial, sans-serif; margin-top: 20px; text-align: center;">
-            <h2 style="color: #e74c3c; margin-top: 0; font-weight: bold;">❌ CODIGO NO ENCONTRADO</h2>
-            <hr style="border-top: 1px solid #444; margin: 10px 0;">
-            <p style="color: #ffffff; font-size: 16px; margin-bottom: 0;">Intente escanear la etiqueta de la caja nuevamente o verifique que esté registrada en la base de datos.</p>
-            </div>
-            ''', unsafe_allow_html=True)
+            st.markdown('<div style="border: 3px solid #e74c3c; padding: 25px; border-radius: 10px; background-color: #222222; font-family: Arial, sans-serif; margin-top: 20px; text-align: center;"><h2 style="color: #e74c3c; margin-top: 0; font-weight: bold;">❌ CODIGO NO ENCONTRADO</h2><hr style="border-top: 1px solid #444; margin: 10px 0;"><p style="color: #ffffff; font-size: 16px; margin-bottom: 0;">Intente escanear la etiqueta de la caja nuevamente o verifique que esté registrada en la base de datos.</p></div>', unsafe_allow_html=True)
     except Exception as e:
         st.error(f'⚠️ Error al procesar la base de datos: {e}')
