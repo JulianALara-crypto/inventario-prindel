@@ -9,6 +9,8 @@ st.markdown('<style>.stApp { background-color: #1a1a1a; } h1 { color: #ffffff; t
 
 if 'codigo_procesado' not in st.session_state:
     st.session_state.codigo_procesado = ''
+if 'input_codigo' not in st.session_state:
+    st.session_state.input_codigo = ''
 
 def limpiar_y_procesar():
     codigo_limpio = st.session_state.input_codigo.replace("'", "-")
