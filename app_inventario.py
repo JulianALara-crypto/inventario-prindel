@@ -55,7 +55,6 @@ if codigo_actual:
             </div>
             ''', unsafe_allow_html=True)
         else:
-            st.error(f"❌ CÓDIGO NO REGISTRADO: El código '{codigo_actual}' no existe en el inventario. Por favor, verifica la etiqueta o reporta al supervisor.")
-
+            st.error(f'❌ El código {codigo_actual} (Base: {codigo_base}) no existe en el inventario.')
     except Exception as e:
         st.error(f'⚠️ Error al procesar la base de datos: {e}')
