@@ -29,35 +29,6 @@ if os.path.exists(ruta_logo):
     with col2: st.image(Image.open(ruta_logo), width=150)
 
 st.title('SISTEMA CONTROL DE INVENTARIOS PRINDEL')
-with st.expander('➕ Registrar Nuevo Producto en el Inventario'):
-    with st.form('form_nuevo_producto', clear_on_submit=True):
-        new_id = st.text_input('ID de la Caja (Ej: L-001)')
-        new_ref = st.text_input('Referencia del Licor')
-        col_c1, col_c2 = st.columns(2)
-        with col_c1: new_cajas = st.number_input('Total de Cajas', min_value=1, value=1, step=1)
-        with col_c2: new_cant = st.number_input('Cantidad por Caja', min_value=1, value=12, step=1)
-        new_operario = st.text_input('Operario de Conteo')
-        new_detalles = st.text_area('Detalles / Novedades', value='Ninguna')
-        btn_guardar = st.form_submit_button('💾 Guardar Producto')
-
-        if btn_guardar:
-            if new_id.strip() == '' or new_ref.strip() == '':
-                st.error('❌ El ID de la Caja y la Referencia son obligatorios.')
-            else:
-                nuevo_registro = pd.DataFrame([{
-                    'id_caja': new_id.strip(),
-                    'referencia_licor': new_ref.strip(),
-                    'cajas_totales': int(new_cajas),
-                    'cantidad_por_caja': int(new_cant),
-                    'operario_conteo': new_operario.strip(),
-                    'detalles_producto': new_detalles.strip()
-                }])
-                try:
-                    nuevo_registro.to_csv('inventario_licores.csv', mode='a', sep='|', index=False, header=not os.path.exists('inventario_licores.csv'), encoding='latin-1')
-                    st.success('✅ ¡Producto guardado exitosamente en la base de datos!')
-                except Exception as e:
-                    st.error(f'❌ Error al guardar el archivo: {e}')
-
 st.text_input('[ESCANEAR CAJA AQUÍ] -> ', key='input_codigo', placeholder='Leer código de barras...', on_change=limpiar_y_procesar)
 
 codigo_actual = st.session_state.codigo_procesado
