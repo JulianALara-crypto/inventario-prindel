@@ -26,7 +26,7 @@ def limpiar_y_procesar():
 
 if os.path.exists(ruta_logo):
     col1, col2, col3 = st.columns(3)
-    with col2: st.image(Image.open(ruta_logo), use_container_width=True)
+    with col2: st.image(Image.open(ruta_logo), width=150)
 
 st.title('SISTEMA CONTROL DE INVENTARIOS PRINDEL')
 st.text_input('[ESCANEAR CAJA AQUÍ] -> ', key='input_codigo', placeholder='Leer código de barras...', on_change=limpiar_y_procesar)
