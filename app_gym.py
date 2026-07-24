@@ -2,50 +2,44 @@ import streamlit as st
 import pandas as pd
 import os
 from datetime import datetime, timedelta
-import urllib.parse
 from PIL import Image
 
-# RUTA DE LA IMAGEN O LOGO DEL GIMNASIO
 ruta_logo_gym = "logo_gym.png" 
+icono_pestana = Image.open(ruta_logo_gym) if os.path.exists(ruta_logo_gym) else "🏋️‍♂️"
 
-# Configuración dinámica del icono de la pestaña del navegador
-if os.path.exists(ruta_logo_gym):
-    icono_pestana = Image.open(ruta_logo_gym)
-else:
-    icono_pestana = "🏋️‍♂️"
-
-# Configuración de página
 st.set_page_config(page_title="Gestor Gimnasio", page_icon=icono_pestana, layout="centered")
 
-# Estilos visuales oscuros
 st.markdown("""
     <style>
         .stApp { background-color: #111111; }
-        h1, h2, h3 { color: #ffffff; text-align: center; }
-        p, label { color: #dddddd !important; }
+        h1, h2, h3, h4 { color: #ffffff !important; text-align: center; }
+        p, label, .stMarkdown { color: #dddddd !important; }
         div[data-testid="stDecoration"] { display: none; }
         .block-container { padding-top: 2rem; }
     </style>
 """, unsafe_allow_html=True)
 
-DB_FILE = "clientes_gym.csv"
-NUM_ADMIN_WHATSAPP = "573000000000" # <-- REEMPLAZAR CON EL WHATSAPP DEL ADMINISTRADOR
+DB_FILE = r"C:\Users\javila\inventario-prindel\gestion-gimnasio\clientes_gym.csv"
+NUM_ADMIN_WHATSAPP = "573000000000"
 
-# Cargar base de datos de manera limpia
 def cargar_datos():
     if not os.path.exists(DB_FILE):
-        df = pd.DataFrame(columns=["cedula", "nombre_completo", "eps", "whatsapp", "metodo_pago", "fecha_ingreso", "valor_pagado", "fecha_vencimiento"])
-        df.to_csv(DB_FILE, sep="|", index=False, encoding="utf-8")
-        return df
-    return pd.read_csv(DB_FILE, sep="|", dtype={"cedula": str, "whatsapp": str}, encoding="utf-8", keep_default_na=False)
+        return pd.DataFrame(columns=["cedula", "nombre_completo", "eps", "whatsapp", "metodo_pago", "fecha_ingreso", "valor_pagado", "fecha_vencimiento"])
+    try:
+        return pd.read_csv(DB_FILE, sep="|", dtype=str, encoding="utf-8", keep_default_na=False)
+    except Exception:
+        return pd.DataFrame(columns=["cedula", "nombre_completo", "eps", "whatsapp", "metodo_pago", "fecha_ingreso", "valor_pagado", "fecha_vencimiento"])
 
-# Guardar base de datos
 def guardar_datos(df):
+    for col in df.columns:
+        df[col] = df[col].astype(str).str.replace(r'[\n\r\t]', ' ', regex=True).str.strip()
     df.to_csv(DB_FILE, sep="|", index=False, encoding="utf-8")
 
 df_clientes = cargar_datos()
 
-# DESPLIEGUE VISUAL DEL LOGO
+def convertir_a_csv(df):
+    return df.to_csv(index=False, sep=";").encode('utf-8-sig')
+
 if os.path.exists(ruta_logo_gym):
     col1, col2, col3 = st.columns(3)
     with col2: 
@@ -53,15 +47,15 @@ if os.path.exists(ruta_logo_gym):
 
 st.title("🏋️‍♂️ SISTEMA DE GESTIÓN - GIMNASIO")
 
-# Navegación del Sistema
-opcion = st.sidebar.radio("MENÚ DE OPERACIONES", ["🆕 Registrar Nuevo Cliente", "🔄 Renovación de Membresía", "🚨 Alertas de Vencimiento"])
+opcion = st.sidebar.radio("MENÚ DE OPERACIONES", [
+    "🆕 Registrar Nuevo Cliente", 
+    "🔄 Renovación de Membresía", 
+    "🚨 Alertas de Vencimiento",
+    "📊 Ver Base de Datos / Descargar"
+])
 
-# =========================================================================
-# MODULO 1: REGISTRO NUEVO CLIENTE
-# =========================================================================
 if opcion == "🆕 Registrar Nuevo Cliente":
     st.subheader("Formulario de Inscripción")
-    
     with st.form("form_nuevo_cliente", clear_on_submit=True):
         cedula = st.text_input("Número de Cédula / ID:").strip()
         nombre = st.text_input("Nombre Completo y Apellidos:").strip()
@@ -80,87 +74,70 @@ if opcion == "🆕 Registrar Nuevo Cliente":
                 st.error("❌ Esta cédula ya se encuentra registrada. Usa el módulo de 'Renovación de Membresía'.")
             else:
                 fecha_vencimiento = fecha_ingreso + timedelta(days=30)
-                
                 nuevo_registro = {
-                    "cedula": cedula,
-                    "nombre_completo": nombre,
-                    "eps": eps,
-                    "whatsapp": whatsapp,
-                    "metodo_pago": metodo_pago,
+                    "cedula": str(cedula),
+                    "nombre_completo": str(nombre),
+                    "eps": str(eps) if eps else "NO REGISTRA",
+                    "whatsapp": str(whatsapp),
+                    "metodo_pago": str(metodo_pago),
                     "fecha_ingreso": fecha_ingreso.strftime("%Y-%m-%d"),
-                    "valor_pagado": int(valor_pagado),
+                    "valor_pagado": str(int(valor_pagado)),
                     "fecha_vencimiento": fecha_vencimiento.strftime("%Y-%m-%d")
                 }
-                
                 df_clientes = pd.concat([df_clientes, pd.DataFrame([nuevo_registro])], ignore_index=True)
                 guardar_datos(df_clientes)
                 st.success(f"🎉 ¡Cliente {nombre} registrado con éxito! Vence el: {fecha_vencimiento.strftime('%Y-%m-%d')}")
 
-# =========================================================================
-# MODULO 2: RENOVACIÓN DE MEMBRESÍA
-# =========================================================================
 elif opcion == "🔄 Renovación de Membresía":
     st.subheader("Renovación de Clientes Antiguos")
-    
     cedula_buscar = st.text_input("Buscar Cliente por Cédula / ID:").strip()
     
     if cedula_buscar:
         registro_existente = df_clientes[df_clientes["cedula"] == cedula_buscar]
-        
         if not registro_existente.empty:
-            cliente = registro_existente.iloc[0]
-            st.info(f"👤 *Cliente Encontrado:* {cliente['nombre_completo']}")
+            cliente = registro_existente.iloc
+            st.info(f"👤 **Cliente Encontrado:** {cliente['nombre_completo']}")
             
             with st.form("form_renovacion"):
                 st.text_input("Nombre Completo:", value=cliente['nombre_completo'], disabled=True)
                 eps_act = st.text_input("Actualizar EPS (Opcional):", value=cliente['eps'])
                 whatsapp_act = st.text_input("Actualizar WhatsApp:", value=cliente['whatsapp'])
-                
                 st.markdown("---")
                 st.markdown("### Datos del Nuevo Periodo de Pago")
                 lista_metodos = ["Efectivo", "Transferencia Bancaria", "Tarjeta de Crédito/Débito", "Otro"]
                 index_metodo = lista_metodos.index(cliente['metodo_pago']) if cliente['metodo_pago'] in lista_metodos else 0
-                
                 metodo_pago_act = st.selectbox("Nuevo Método de Pago:", lista_metodos, index=index_metodo)
                 fecha_ingreso_act = st.date_input("Nueva Fecha de Pago / Ingreso:", datetime.today())
-                valor_pagado_act = st.number_input("Nuevo Valor Pagado ($):", min_value=0, step=1000, value=int(cliente['valor_pagado']) if str(cliente['valor_pagado']).isdigit() else 0)
+                
+                try:
+                    val_defecto = int(float(cliente['valor_pagado']))
+                except Exception:
+                    val_defecto = 0
+                    
+                valor_pagado_act = st.number_input("Nuevo Valor Pagado ($):", min_value=0, step=1000, value=val_defecto)
                 
                 btn_renovar = st.form_submit_button("Procesar Renovación de Membresía")
-                
                 if btn_renovar:
                     fecha_vencimiento_act = fecha_ingreso_act + timedelta(days=30)
-                    
                     df_clientes.loc[df_clientes["cedula"] == cedula_buscar, ["eps", "whatsapp", "metodo_pago", "fecha_ingreso", "valor_pagado", "fecha_vencimiento"]] = [
-                        eps_act,
-                        whatsapp_act,
-                        metodo_pago_act,
-                        fecha_ingreso_act.strftime("%Y-%m-%d"),
-                        int(valor_pagado_act),
-                        fecha_vencimiento_act.strftime("%Y-%m-%d")
+                        str(eps_act), str(whatsapp_act), str(metodo_pago_act), fecha_ingreso_act.strftime("%Y-%m-%d"), str(int(valor_pagado_act)), fecha_vencimiento_act.strftime("%Y-%m-%d")
                     ]
-                    
                     guardar_datos(df_clientes)
                     st.success(f"🔄 ¡Membresía renovada correctamente! Nuevo vencimiento: {fecha_vencimiento_act.strftime('%Y-%m-%d')}")
         else:
             st.error("❌ El número de cédula ingresado no coincide con ningún cliente registrado.")
 
-# =========================================================================
-# MODULO 3: ALERTAS DE VENCIMIENTO Y ENVIOS WHATSAPP
-# =========================================================================
 elif opcion == "🚨 Alertas de Vencimiento":
     st.subheader("Control de Mensualidades por Vencer o Vencidas")
-    
     hoy = datetime.today().date()
     
     if not df_clientes.empty:
         df_calculo = df_clientes.copy()
         df_calculo["fecha_vencimiento_dt"] = pd.to_datetime(df_calculo["fecha_vencimiento"], errors='coerce').dt.date
-        
         clientes_alerta = df_calculo[df_calculo["fecha_vencimiento_dt"] <= (hoy + timedelta(days=3))]
         
         if not clientes_alerta.empty:
             st.warning(f"Se encontraron {len(clientes_alerta)} mensualidades que requieren atención inmediata.")
-            
             for idx, fila in clientes_alerta.iterrows():
                 estado = "🔴 VENCIDO" if fila["fecha_vencimiento_dt"] < hoy else "🟡 POR VENCER"
                 dias_restantes = (fila["fecha_vencimiento_dt"] - hoy).days
@@ -168,26 +145,27 @@ elif opcion == "🚨 Alertas de Vencimiento":
                 with st.container():
                     st.markdown(f"""
                         <div style="border: 1px solid #444; padding: 15px; border-radius: 8px; background-color: #222222; margin-bottom: 10px;">
-                            <h4 style="margin:0; color:#ffffff;">{fila['nombre_completo']} ({estado})</h4>
-                            <p style="margin:5px 0 0 0; font-size:14px;"><b>Cédula:</b> {fila['cedula']} | <b>Vencimiento:</b> {fila['fecha_vencimiento']} ({dias_restantes} días)</p>
-                            <p style="margin:5px 0 0 0; font-size:14px;"><b>WhatsApp Cliente:</b> {fila['whatsapp']}</p>
+                            <h4 style="margin:0; color:#ffffff; text-align:left;">{fila['nombre_completo']} ({estado})</h4>
+                            <p style="margin:5px 0 0 0; font-size:14px; color:#ddd;"><b>Cédula:</b> {fila['cedula']} | <b>WhatsApp:</b> {fila['whatsapp']}</p>
+                            <p style="margin:2px 0 0 0; font-size:14px; color:#ddd;"><b>Vence el:</b> {fila['fecha_vencimiento']} ({abs(dias_restantes)} días {'atrás' if dias_restantes < 0 else 'restantes'})</p>
                         </div>
                     """, unsafe_allow_html=True)
-                    
-                    msg_cliente = f"Hola {fila['nombre_completo']}, te saludamos de tu Gym. Te recordamos que tu mensualidad presenta un estado {estado} con fecha de corte el {fila['fecha_vencimiento']}. ¡Te esperamos para seguir entrenando juntos!"
-                    msg_admin = f"ALERTA GYM: El cliente {fila['nombre_completo']} con Cédula {fila['cedula']} se encuentra {estado}. Su vencimiento fue el {fila['fecha_vencimiento']}. Tel: {fila['whatsapp']}"
-                    
-                    url_cliente = f"https://api.whatsapp.com/send?phone={fila['whatsapp']}&text={urllib.parse.quote(msg_cliente)}"
-                    url_admin = f"https://api.whatsapp.com/send?phone={NUM_ADMIN_WHATSAPP}&text={urllib.parse.quote(msg_admin)}"
-                    
-                    col1, col2 = st.columns(2)
-                    with col1:
-                        st.link_button("📲 Notificar al Cliente", url_cliente, use_container_width=True)
-                    with col2:
-                        st.link_button("🛡️ Enviar Alerta al Admin", url_admin, use_container_width=True)
-                        
-                    st.markdown("---")
         else:
-            st.success("🎉 ¡Excelente! No hay membresías vencidas ni próximas a vencer en los siguientes 3 días.")
+            st.success("✅ ¡Excelente! No hay clientes vencidos ni próximos a vencer en los siguientes 3 días.")
     else:
-        st.info("La base de datos se encuentra vacía actualmente.")
+        st.info("📂 La base de datos se encuentra vacía actualmente.")
+
+elif opcion == "📊 Ver Base de Datos / Descargar":
+    st.subheader("Historial de Clientes Guardados")
+    if not df_clientes.empty:
+        st.write(f"Total de registros encontrados: {len(df_clientes)}")
+        st.dataframe(df_clientes)
+        csv_descarga = convertir_a_csv(df_clientes)
+        st.download_button(
+            label="📥 Descargar Base de Datos en CSV",
+            data=csv_descarga,
+            file_name="clientes_gym_web.csv",
+            mime="text/csv",
+        )
+    else:
+        st.info("📂 No hay datos registrados en la web en este momento.")
